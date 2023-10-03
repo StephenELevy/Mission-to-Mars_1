@@ -32,6 +32,8 @@ def scrape_all():
 
            "facts": mars_facts(),
 
+           "hemisphere": hemisphere_urls(browser),
+
            "last_modified": dt.datetime.now()
     }
 
@@ -96,12 +98,17 @@ def featured_image(browser):
         # Find the relative image url    
         img_url_rel = img_soup.find('img', class_='fancybox-image').get('src')
 
+        img_url_rel
+
     except AttributeError:
         return None
 
 
     # Use the base URL to create an absolute URL
     img_url = f'https://data-class-jpl-space.s3.amazonaws.com/JPL_Space/{img_url_rel}'
+
+    img_url
+    
 
     return img_url
 
@@ -122,12 +129,35 @@ def mars_facts():
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html()
 
+def hemisphere_urls(browser):
+    # 1. Use browser to visit the URL 
+    url = 'https://data-class-mars-hemispheres.s3.amazonaws.com/Mars_Hemispheres/index.html'
+
+    browser.visit(url)
+
+    # 2. Create a list to hold the images and titles.
+    hemisphere_image_urls = []
+
+    # 3. Write code to retrieve the image urls and titles for each hemisphere.
+    for i in range(4):
+           #create empty dictionary
+        mars_hemis = {}
+
+        browser.find_by_css('a.product-item h3')[i].click()
+        element = browser.find_link_by_text('Sample').first
+        img_url = element['href']
+        title = browser.find_by_css("h2.title").text
+        mars_hemis["img_url"] = img_url
+        mars_hemis["title"] = title
+        hemisphere_image_urls.append(mars_hemis)
+
+        browser.back()
+
+    return hemisphere_image_urls
+  
 if __name__ == "__main__":
     # If running as script, print scraped data
     print(scrape_all())
-
-
-
 
 # Export to Python
 
